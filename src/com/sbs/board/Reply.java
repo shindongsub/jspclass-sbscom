@@ -11,6 +11,7 @@ public class Reply {
 	public Reply(int id, String parentId, String body, String writer, String regDate) {
 		this.id = id;
 		this.parentId = parentId;
+		this.body = body;
 		this.writer = writer;
 		this.regDate = regDate;
 	}

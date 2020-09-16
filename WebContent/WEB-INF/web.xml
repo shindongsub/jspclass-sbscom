@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app version="3.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+	
+	<filter>  <!-- filter 네임과 클래스 적용부분 -->
+		<filter-name>
+			MyFilter
+		</filter-name>
+		<filter-class>
+			com.sbs.board.MyFilter
+		</filter-class>	
+	</filter>
+	
+	<filter-mapping>  <!-- filter 맵핑부분 필터 네임은 com.sbs.board에서 적용한 MyFilter를 적고
+	pattern엔 필터를 적용할 url입력한다. /*하면 모든것에 반영 -->
+		<filter-name>MyFilter</filter-name>
+		<url-pattern>/test</url-pattern>
+	</filter-mapping>
+	
+</web-app>

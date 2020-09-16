@@ -28,6 +28,7 @@
 <form action="test?cmd=reply">
 내용 입력 : <input type="text" name="body"><br>
 작성자 입력 : <input type="text" name="nickname"><br>
+<input type="hidden" name="parentId" value="<%= article.getId() %>">
 <input type="hidden" name="cmd" value="reply">
 <input type="submit">
 </form>

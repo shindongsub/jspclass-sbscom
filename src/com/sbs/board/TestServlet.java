@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,11 +19,29 @@ public class TestServlet extends HttpServlet {
 	final String EXTENTION = ".jsp";
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setCharacterEncoding("UTF-8");
+		ServletContext application = request.getServletContext();
+		String msg = (String)request.getAttribute("msg");
+//		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html; charset=utf-8");
-
+//		System.out.println(msg);
+		
 		String cmd = request.getParameter("cmd");
 		PrintWriter pw = response.getWriter();
+		
+		
+//		ServletContext application = request.getServletContext();
+//		String rst1 = (String)request.getAttribute("key");
+//		String rst2 = (String)application.getAttribute("key");
+//		if(rst1 == null) {
+//			System.out.println("값이 없습니다.");
+//		}else {
+//			System.out.println(rst1);
+//		}
+//		if(rst2 == null) {
+//			System.out.println("값이 없습니다.");
+//		}else{
+//			System.out.println(rst2);
+//		}
 		
 		if(cmd.equals("list")) {
 			List<Article> articles = dao.getAllArticles();
@@ -63,23 +82,31 @@ public class TestServlet extends HttpServlet {
 			forwarding(request, response, url);
 		}
 		else if(cmd.equals("delete")) {
-			String id = request.getParameter("id");
-			dao.deleteArticle(id);
+			String[] ids = request.getParameterValues("ckb");
+			dao.deleteArticle(ids);
+			for (int i=0; i<ids.length;i++) {
+				System.out.println(ids[i]);
+			}
+			dao.deleteArticle(ids);
 			response.sendRedirect("test?cmd=list");
 		}
 		else if(cmd.equals("read")) {
 			String id = request.getParameter("id");
 			Article article = dao.readArticle(id);
 			request.setAttribute("article", article);
+			
+			List<Reply> reply = dao.getRepliesById(id);
+			request.setAttribute("reply", reply);
+			
 			String url = ARTICLEPATH+"detailjsp"+EXTENTION;
 			forwarding(request, response, url);
 		}
 		else if(cmd.equals("reply")) {
-			String id = request.getParameter("id");
-			List<Reply> reply = dao.getAllReplies();
-			request.setAttribute("reply", reply);
-			String url = ARTICLEPATH+"reply"+EXTENTION;
-			forwarding(request, response, url);
+			String parentId = request.getParameter("parentId");
+			String body = request.getParameter("body");
+			String nickname = request.getParameter("nickname");
+			dao.addReply(parentId, body, nickname);
+			response.sendRedirect("test?cmd=read&id="+parentId);
 		}
 		else if(cmd.equals("addReply")) {
 			String id = request.getParameter("parentId");
@@ -87,6 +114,46 @@ public class TestServlet extends HttpServlet {
 			request.setAttribute("article", article);
 			
 			String url = ARTICLEPATH +"reply"+EXTENTION;
+			forwarding(request, response, url);
+		}
+		else if(cmd.equals("readReply")) {
+			String id = request.getParameter("id");
+			Reply reply = dao.readReply(id);
+			request.setAttribute("reply", reply);
+			
+			String url = ARTICLEPATH+"updateReply"+EXTENTION;
+			forwarding(request, response, url);
+		}
+		else if(cmd.equals("updateReply")) {
+			String id = request.getParameter("id");
+			String body = request.getParameter("body");
+			String writer = request.getParameter("writer");
+			dao.updateReply(id, body, writer);
+			
+			response.sendRedirect("test?cmd=list");
+			
+		}
+		else if(cmd.equals("deleteReply")) {
+			String id = request.getParameter("id");
+			dao.deleteReplyById(id);
+			response.sendRedirect("test?cmd=list");
+		}
+//		loginpage
+		else if(cmd.equals("login")) {
+
+			String loginId =  request.getParameter("loginId");
+			String loginPw = request.getParameter("loginPw");
+			Member member = dao.loginCheckByIdPw(loginId, loginPw);
+			
+			application.setAttribute("loginId", loginId);
+
+			
+
+			String url = ARTICLEPATH+"loginPage"+EXTENTION;
+			forwarding(request, response, url);
+		}
+		else if(cmd.equals("logincheck")) {
+			String url = ARTICLEPATH+"logincheck"+EXTENTION;
 			forwarding(request, response, url);
 		}
 	}
@@ -100,6 +167,9 @@ public class TestServlet extends HttpServlet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
 	}
 
 
